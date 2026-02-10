@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BGMI Slot Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  margin:0;
+  background:#020617;
+  font-family:Arial, sans-serif;
+  color:white;
+}
+
+/* MAIN BOX */
+.box{
+  max-width:950px;
+  margin:16px auto;
+  background:#0f172a;
+  padding:14px;
+  border-radius:14px;
+}
+
+h2{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+/* ADMIN CONTROL */
+.admin{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+
+select{
+  background:#020617;
+  color:white;
+  border:1px solid #334155;
+  padding:6px 10px;
+  border-radius:8px;
+}
+
+/* SLOT GRID */
+.slots{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+/* SLOT BASE */
+.slot{
+  background:#020617;
+  border:1px solid #1e293b;
+  border-radius:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  transition:0.3s;
+  overflow:hidden;
+}
+
+/* SLOT SIZES */
+.small{height:42px; padding:6px 8px;}
+.medium{height:54px; padding:8px 10px;}
+.large{height:66px; padding:10px 12px;}
+
+/* EMPTY SLOT */
+.slot.empty{
+  opacity:0.45;
+}
+
+/* BOOKED SLOT */
+.slot.booked{
+  background:linear-gradient(135deg,#052e16,#022c22);
+  border-color:#22c55e;
+  box-shadow:0 0 10px rgba(34,197,94,.45);
+}
+
+/* SLOT TEXT */
+.slot-number{
+  font-size:13px;
+  color:#38bdf8;
+  font-weight:bold;
+}
+
+.slot-name{
+  font-size:13px;
+  text-align:right;
+  max-width:70%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* PULSE */
+@keyframes glow{
+  0%{box-shadow:0 0 0 rgba(34,197,94,.2)}
+  50%{box-shadow:0 0 14px rgba(34,197,94,.8)}
+  100%{box-shadow:0 0 0 rgba(34,197,94,.2)}
+}
+.slot.booked{
+  animation:glow 2s infinite;
+}
+
+/* MOBILE */
+@media(max-width:520px){
+  .slot-name{font-size:12px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>🎮 BGMI SLOT STATUS</h2>
+
+  <!-- 🔐 ADMIN CONTROL -->
+  <div class="admin">
+    <select id="slotCount">
+      <option value="15">15 Slots</option>
+      <option value="18">18 Slots</option>
+      <option value="20">20 Slots</option>
+      <option value="26" selected>26 Slots</option>
+    </select>
+
+    <select id="slotSize">
+      <option value="small">Small</option>
+      <option value="medium" selected>Medium</option>
+      <option value="large">Large</option>
+    </select>
+  </div>
+
+  <!-- SLOT VIEW -->
+  <div class="slots" id="slots"></div>
+</div>
+
+<!-- 🔥 FIREBASE -->
+<script type="module">
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDsJUtZdIXcsB0w_2MQhMBXxIgbI3ijOvg",
+  databaseURL: "https://incoinpaysliveearning-default-rtdb.firebaseio.com",
+  projectId: "incoinpaysliveearning"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const slotsDiv = document.getElementById("slots");
+const slotCountSel = document.getElementById("slotCount");
+const slotSizeSel = document.getElementById("slotSize");
+
+let TOTAL_SLOTS = parseInt(slotCountSel.value);
+let SLOT_SIZE = slotSizeSel.value;
+
+/* DRAW SLOTS */
+function drawSlots(){
+  slotsDiv.innerHTML = "";
+  for(let i=1;i<=TOTAL_SLOTS;i++){
+    slotsDiv.innerHTML += `
+      <div class="slot empty ${SLOT_SIZE}" id="slot-${i}">
+        <div class="slot-number">#${i}</div>
+        <div class="slot-name">Empty</div>
+      </div>
+    `;
+  }
+}
+
+/* INITIAL */
+drawSlots();
+
+/* ADMIN CHANGE */
+slotCountSel.onchange = ()=>{
+  TOTAL_SLOTS = parseInt(slotCountSel.value);
+  drawSlots();
+};
+slotSizeSel.onchange = ()=>{
+  SLOT_SIZE = slotSizeSel.value;
+  drawSlots();
+};
+
+/* LIVE BOOKINGS */
+onValue(ref(db,"bookings"), snap=>{
+  drawSlots();
+  if(!snap.exists()) return;
+
+  let i=1;
+  snap.forEach(child=>{
+    if(i > TOTAL_SLOTS) return;
+
+    const d = child.val();
+    const slot = document.getElementById(`slot-${i}`);
+
+    slot.classList.remove("empty");
+    slot.classList.add("booked");
+
+    slot.querySelector(".slot-name").innerText =
+      d.name ? d.name : "Player";
+
+    i++;
+  });
+});
+</script>
+
+</body>
+</html>
