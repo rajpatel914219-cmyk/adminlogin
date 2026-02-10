@@ -1,40 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <title>Admin Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 <style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
 body{
-  background:#020617;
-  font-family:Arial;
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(circle at top,#0b1220,#020617);
+  font-family:Arial, sans-serif;
   color:white;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:30px 12px;
 }
+
+/* ================= LOGIN CARD ================= */
 .box{
-  width:360px;
-  margin:80px auto;
-  background:#0f172a;
-  padding:25px;
-  border-radius:12px;
+  width:100%;
+  max-width:360px;
+  background:linear-gradient(180deg,#0f172a,#020617);
+  padding:22px 20px;
+  border-radius:16px;
   text-align:center;
+  box-shadow:
+    0 0 25px rgba(34,197,94,.15),
+    inset 0 0 12px rgba(0,0,0,.6);
+  animation:cardIn .4s ease;
 }
+
+/* ================= TITLE ================= */
 h2{
-  margin-bottom:20px;
+  margin:0 0 18px;
+  font-size:18px;
+  letter-spacing:1px;
+  color:#22c55e;
+  text-shadow:0 0 12px rgba(34,197,94,.8);
 }
+
+/* ================= INPUTS ================= */
 input,button{
   width:100%;
-  padding:12px;
+  padding:13px;
   margin:10px 0;
   border:none;
-  border-radius:6px;
+  border-radius:10px;
+  font-size:15px;
 }
+
+input{
+  background:#020617;
+  color:white;
+  box-shadow:inset 0 0 6px rgba(0,0,0,.6);
+}
+
+input::placeholder{
+  color:#94a3b8;
+}
+
+/* ================= BUTTON ================= */
 button{
-  background:#22c55e;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#022c22;
   font-weight:bold;
   cursor:pointer;
+  box-shadow:0 6px 0 #065f46;
+  transition:.12s;
 }
+
+button:active{
+  transform:translateY(4px);
+  box-shadow:0 2px 0 #065f46;
+}
+
+/* ================= MESSAGE ================= */
 #msg{
   margin-top:10px;
   font-size:14px;
+  min-height:18px;
+}
+
+/* ================= ANIMATION ================= */
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(20px) scale(.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* ================= SMALL DEVICES ================= */
+@media(max-width:360px){
+  h2{font-size:16px}
+  input,button{font-size:14px;padding:12px}
 }
 </style>
 </head>
@@ -42,7 +105,7 @@ button{
 <body>
 
 <div class="box">
-  <h2>ADMIN LOGIN</h2>
+  <h2>🔐 ADMIN LOGIN</h2>
 
   <input id="email" type="email" placeholder="Admin Email">
   <input id="password" type="password" placeholder="Password">
@@ -54,12 +117,11 @@ button{
 
 <!-- ============ FIREBASE AUTH ============ -->
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  onAuthStateChanged 
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* 🔥 FIREBASE CONFIG */
@@ -78,7 +140,7 @@ const auth = getAuth(app);
 
 /* 🔑 LOGIN */
 window.login = ()=>{
-  const email = document.getElementById("email").value;
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
   const msg = document.getElementById("msg");
 
@@ -93,22 +155,21 @@ window.login = ()=>{
       msg.innerHTML = "✅ Login successful";
       msg.style.color = "#22c55e";
       setTimeout(()=>{
-        window.location.href = "index.html";
-      },800);
+        window.location.href = "admin.html";
+      },700);
     })
     .catch(err=>{
-      msg.innerHTML = "❌ " + err.message;
+      msg.innerHTML = "❌ Invalid credentials";
       msg.style.color = "red";
     });
 };
 
-/* 🔒 AUTO REDIRECT IF LOGGED IN */
+/* 🔒 AUTO REDIRECT */
 onAuthStateChanged(auth,user=>{
   if(user){
     window.location.href = "admin.html";
   }
 });
-
 </script>
 
 </body>
